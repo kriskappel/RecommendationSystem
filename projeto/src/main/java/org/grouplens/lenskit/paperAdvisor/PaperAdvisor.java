@@ -37,6 +37,7 @@ public class PaperAdvisor implements Runnable {
 
 	//private variables
 	private List<Long> userIds = new ArrayList<>();
+    private List<Long> userNRec = new ArrayList<>();
 
 	private static final Logger printLogs = LoggerFactory.getLogger(PaperAdvisor.class);
 
@@ -45,9 +46,18 @@ public class PaperAdvisor implements Runnable {
     //public methods
 
     public PaperAdvisor(String[] args) {
+        Boolean flag=true;
         for (String id: args) {
-            userIds.add(Long.parseLong(id));
-    	}        
+            if(flag) {
+                userIds.add(Long.parseLong(id));
+                flag = !flag;
+            }
+            else {
+                userNRec.add(Long.parseLong(id));
+                flag = !flag;
+            }
+
+        }            
     }
 
      public void run() {
@@ -83,12 +93,13 @@ public class PaperAdvisor implements Runnable {
         assert itemRec != null; //recommender configured -> !=null
        
        	//print recommendations
+        int userNumber = 0;
         for (long id : userIds) { //for each user
             
-            ResultList recommendations = itemRec.recommendWithDetails(id, 10, null, null);
+            ResultList recommendations = itemRec.recommendWithDetails(id, userNRec.get(userNumber).intValue(), null, null);
             System.out.println("\nPapers recommended to user  " +id+ " :\n");
 
-            for (int i = 0 ; i < 10 ; i++) { //recommend papers
+            for (int i = 0 ; i < userNRec.get(userNumber) ; i++) { //recommend papers
 
             	Result paper = recommendations.get(i);
 
@@ -105,7 +116,7 @@ public class PaperAdvisor implements Runnable {
                 System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
 
             }
-            
+            userNumber++;
         }
     }
 }
