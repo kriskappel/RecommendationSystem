@@ -64,7 +64,7 @@ public class PaperAdvisor implements Runnable {
 
      	//lenskit config
      	LenskitConfiguration configLenskit = null;
-     	File groovy = new File("etc/item-item.groovy");
+     	File groovy = new File("etc/user-item.groovy");
 
         try {
             configLenskit = ConfigHelpers.load(groovy);
