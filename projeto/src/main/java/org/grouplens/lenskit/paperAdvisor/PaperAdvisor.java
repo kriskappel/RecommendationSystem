@@ -43,19 +43,34 @@ public class PaperAdvisor implements Runnable {
 
     private Path path = Paths.get("data/movielens.yml");
     
+    //recMethod:
+    //1- item-item
+    //2- user-user
+    //3- Popularity rank
+    private int recMethod;
+    
     //public methods
 
     public PaperAdvisor(String[] args) {
-        Boolean flag=true;
+       // Boolean flag=true;
+        int i = 0;
         for (String id: args) {
-            if(flag) {
+            if(i==0){
+                recMethod = Integer.parseInt(id);
+                i++;
+            }
+            else if(i == 1) {
                 userIds.add(Long.parseLong(id));
-                flag = !flag;
+                i++;
+            }
+            else if(i==2){
+                userNRec.add(Long.parseLong(id));
+                i--;
             }
             else {
-                userNRec.add(Long.parseLong(id));
-                flag = !flag;
+                System.out.println("INVALID RECOMMENDATION METHOD!");
             }
+
 
         }            
     }
@@ -64,7 +79,24 @@ public class PaperAdvisor implements Runnable {
 
      	//lenskit config
      	LenskitConfiguration configLenskit = null;
-     	File groovy = new File("etc/user-item.groovy");
+
+        //recMethod:
+        //1- item-item
+        //2- user-user
+        //3- Popularity rank
+        File groovy = new File("etc/popularityRank.groovy");
+        if(recMethod == 1){
+         	groovy = new File("etc/item-item.groovy");
+        }
+        else if(recMethod == 2){
+            groovy = new File("etc/user-user.groovy");
+        }
+        else if(recMethod == 3){
+            groovy = new File("etc/popularityRank.groovy");
+        }
+        else {
+            System.out.println("INVALID RECOMMENDATION METHOD \n DEFAULT POPULARITY RANK WILL BE USED");
+        }
 
         try {
             configLenskit = ConfigHelpers.load(groovy);
