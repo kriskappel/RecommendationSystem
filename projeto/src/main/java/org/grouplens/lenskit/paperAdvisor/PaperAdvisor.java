@@ -32,16 +32,22 @@ public class PaperAdvisor implements Runnable {
 	public static void main(String[] args) {
         PaperAdvisor paperadvisor = new PaperAdvisor(args);
       
-        paperadvisor.run();
+        paperadvisor.execRec(10L, 10L, 3);
+        //paperadvisor.run();
     }
 
 	//private variables
-	private List<Long> userIds = new ArrayList<>();
-    private List<Long> userNRec = new ArrayList<>();
+	//private List<Long> userIds = new ArrayList<>();
+    //private List<Long> userNRec = new ArrayList<>();
+
+    private Long userId;
+    private Long nRec;
 
 	private static final Logger printLogs = LoggerFactory.getLogger(PaperAdvisor.class);
 
     private Path path = Paths.get("data/movielens.yml");
+
+    private File groovy = null;
     
     //recMethod:
     //1- item-item
@@ -60,11 +66,11 @@ public class PaperAdvisor implements Runnable {
                 i++;
             }
             else if(i == 1) {
-                userIds.add(Long.parseLong(id));
+                userId = (Long.parseLong(id));
                 i++;
             }
             else if(i==2){
-                userNRec.add(Long.parseLong(id));
+                nRec = (Long.parseLong(id));
                 i--;
             }
             else {
@@ -72,10 +78,21 @@ public class PaperAdvisor implements Runnable {
             }
 
 
-        }            
+        }   
+
+                 
     }
 
-     public void run() {
+    public void execRec(Long user, Long recNumber, int method)
+    {
+        userId = user;
+        nRec = recNumber;
+        recMethod = method;
+
+        run();
+    }
+
+    public void run() {
 
      	//lenskit config
      	LenskitConfiguration configLenskit = null;
@@ -86,6 +103,7 @@ public class PaperAdvisor implements Runnable {
         //3- Popularity rank
         File groovy = new File("etc/popularityRank.groovy");
         if(recMethod == 1){
+
          	groovy = new File("etc/item-item.groovy");
         }
         else if(recMethod == 2){
@@ -125,31 +143,32 @@ public class PaperAdvisor implements Runnable {
         assert itemRec != null; //recommender configured -> !=null
        
        	//print recommendations
-        int userNumber = 0;
-        for (long id : userIds) { //for each user
-            
-            ResultList recommendations = itemRec.recommendWithDetails(id, userNRec.get(userNumber).intValue(), null, null);
-            System.out.println("\nPapers recommended to user  " +id+ " :\n");
 
-            for (int i = 0 ; i < userNRec.get(userNumber) ; i++) { //recommend papers
+        int idUser = userId.intValue();
+        int numberRec = nRec.intValue();
 
-            	Result paper = recommendations.get(i);
+        
+        ResultList recommendations = itemRec.recommendWithDetails(idUser, numberRec, null, null);
+        System.out.println("\nPapers recommended to user  " +idUser+ " :\n");
 
-                Entity entityPaper = dao.lookupEntity(CommonTypes.ITEM, paper.getId());
-                String namePaper = "";
+        for (int i = 0 ; i < numberRec ; i++) { //recommend papers
 
-                if (entityPaper != null) {
-                    namePaper = entityPaper.maybeGet(CommonAttributes.NAME);
-                }
+        	Result paper = recommendations.get(i);
 
-                //System.out.print("\t" + i + "- Title = " + namePaper + " | id = " + paper.getId() + " | score = " +paper.getScore());
-                //System.out.printf("%.2f\n", paper.getScore());
+            Entity entityPaper = dao.lookupEntity(CommonTypes.ITEM, paper.getId());
+            String namePaper = "";
 
-                System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
-
+            if (entityPaper != null) {
+                namePaper = entityPaper.maybeGet(CommonAttributes.NAME);
             }
-            userNumber++;
+
+            //System.out.print("\t" + i + "- Title = " + namePaper + " | id = " + paper.getId() + " | score = " +paper.getScore());
+            //System.out.printf("%.2f\n", paper.getScore());
+
+            System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
+
         }
+    
     }
 }
 
