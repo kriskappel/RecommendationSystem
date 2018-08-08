@@ -93,7 +93,29 @@ public class PaperAdvisor implements Runnable {
 
 
         }   */
+        List<String> coldstart = new ArrayList();
 
+        for(Long j = 1L; j <11L; j++)
+        {
+            popIds.add(j);
+            itemIds.add(j);
+            userIds.add(j);
+        }
+
+        coldstart.add("Desenvolvendo um Sistema de Recomendacao de Objetos de Aprendizagem baseado em Competencias para a Educacao: relato de experiencias");
+        coldstart.add("Recommender systems in technology enhanced learning");
+        coldstart.add("A K-Means Clustering Algorithm");
+        coldstart.add("What is an Ontology?");
+        coldstart.add("The Role of Trust and Deception in Virtual Societies");
+        coldstart.add("Sharing a Secret: How Kerberos Works");
+        coldstart.add("Using trust in recommender systems: an experimental analysis");
+        coldstart.add("What drives a successful e-Learning? An empirical investigation of the critical factors influencing learner satisfaction");
+        coldstart.add("Constructionist Design Methodology for Interactive Intelligences");
+        coldstart.add("A knowledge and collaboration-based CBR process to improve network performance-related support activities");
+
+        popTitle = coldstart;
+        itemTitle = coldstart;
+        userTitle = coldstart;
                  
     }
 
@@ -184,40 +206,43 @@ public class PaperAdvisor implements Runnable {
         
         ResultList recommendations = itemRec.recommendWithDetails(idUser, numberRec, null, null);
         //System.out.println("\nPapers recommended to user  " +idUser+ " :\n");
+        try{
+            for (int i = 0 ; i < numberRec ; i++) { //recommend papers
 
-        for (int i = 0 ; i < numberRec ; i++) { //recommend papers
+                Result paper = recommendations.get(i);
 
-            Result paper = recommendations.get(i);
+                Entity entityPaper = dao.lookupEntity(CommonTypes.ITEM, paper.getId());
+                String namePaper = "";
 
-            Entity entityPaper = dao.lookupEntity(CommonTypes.ITEM, paper.getId());
-            String namePaper = "";
+                if (entityPaper != null) {
+                    namePaper = entityPaper.maybeGet(CommonAttributes.NAME);
+                }
 
-            if (entityPaper != null) {
-                namePaper = entityPaper.maybeGet(CommonAttributes.NAME);
+                //System.out.print("\t" + i + "- Title = " + namePaper + " | id = " + paper.getId() + " | score = " +paper.getScore());
+                //System.out.printf("%.2f\n", paper.getScore());
+                indices.add(paper.getId());
+                titles.add(namePaper);
+
+
+                //System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
+
             }
 
-            //System.out.print("\t" + i + "- Title = " + namePaper + " | id = " + paper.getId() + " | score = " +paper.getScore());
-            //System.out.printf("%.2f\n", paper.getScore());
-            indices.add(paper.getId());
-            titles.add(namePaper);
-
-
-            //System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
-
+            if(recMethod == 1){
+                itemIds = indices;
+                itemTitle = titles;
+            }
+            else if(recMethod == 2){
+                userIds = indices;
+                userTitle = titles;
+            }
+            else if(recMethod == 3){
+                popIds = indices;
+                popTitle = titles;
+            }
         }
-
-        if(recMethod == 1){
-            itemIds = indices;
-            itemTitle = titles;
-        }
-        else if(recMethod == 2){
-            userIds = indices;
-            userTitle = titles;
-        }
-        else if(recMethod == 3){
-            popIds = indices;
-            popTitle = titles;
-        }
+        catch(Exception e)
+        {}
     
     }
     
