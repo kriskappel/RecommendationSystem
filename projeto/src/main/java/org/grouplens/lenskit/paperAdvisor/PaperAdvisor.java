@@ -32,7 +32,8 @@ public class PaperAdvisor implements Runnable {
 	public static void main(String[] args) {
         PaperAdvisor paperadvisor = new PaperAdvisor(args);
       
-        paperadvisor.execRec(10L, 10L, 3);
+        paperadvisor.execRec(10L, 10L);
+
         //paperadvisor.run();
     }
 
@@ -49,6 +50,16 @@ public class PaperAdvisor implements Runnable {
 
     private File groovy = null;
     
+
+    private List<Long> popIds = new ArrayList<>();
+    private List<String> popTitle = new ArrayList();
+
+    private List<Long> itemIds = new ArrayList<>();
+    private List<String> itemTitle = new ArrayList();
+
+    private List<Long> userIds = new ArrayList<>();
+    private List<String> userTitle = new ArrayList();
+
     //recMethod:
     //1- item-item
     //2- user-user
@@ -83,11 +94,28 @@ public class PaperAdvisor implements Runnable {
                  
     }
 
-    public void execRec(Long user, Long recNumber, int method)
+    public void execRec(Long user, Long recNumber)
     {
+
+        //recMethod:
+        //1- item-item
+        //2- user-user
+        //3- Popularity rank
         userId = user;
         nRec = recNumber;
-        recMethod = method;
+        recMethod = 1;
+
+        run();
+
+        userId = user;
+        nRec = recNumber;
+        recMethod = 2;
+
+        run();
+
+        userId = user;
+        nRec = recNumber;
+        recMethod = 3;
 
         run();
     }
@@ -147,9 +175,12 @@ public class PaperAdvisor implements Runnable {
         int idUser = userId.intValue();
         int numberRec = nRec.intValue();
 
+        List<Long> indices = new ArrayList<>();
+
+        List<String> titles = new ArrayList<>();
         
         ResultList recommendations = itemRec.recommendWithDetails(idUser, numberRec, null, null);
-        System.out.println("\nPapers recommended to user  " +idUser+ " :\n");
+        //System.out.println("\nPapers recommended to user  " +idUser+ " :\n");
 
         for (int i = 0 ; i < numberRec ; i++) { //recommend papers
 
@@ -164,9 +195,25 @@ public class PaperAdvisor implements Runnable {
 
             //System.out.print("\t" + i + "- Title = " + namePaper + " | id = " + paper.getId() + " | score = " +paper.getScore());
             //System.out.printf("%.2f\n", paper.getScore());
+            indices.add(paper.getId());
+            titles.add(namePaper);
 
-            System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
 
+            //System.out.format("\t %d - Title = %s | id = %d | score = %.2f\n", (i+1), namePaper, paper.getId(), paper.getScore());
+
+        }
+
+        if(recMethod == 1){
+            itemIds = indices;
+            itemTitle = titles;
+        }
+        else if(recMethod == 2){
+            userIds = indices;
+            userTitle = titles;
+        }
+        else if(recMethod == 3){
+            popIds = indices;
+            popTitle = titles;
         }
     
     }
