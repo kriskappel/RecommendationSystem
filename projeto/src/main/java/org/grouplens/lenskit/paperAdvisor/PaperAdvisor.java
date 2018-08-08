@@ -24,17 +24,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
-
+import java.io.FileWriter;
+import java.sql.Timestamp;
+import java.sql.Timestamp;
 
 public class PaperAdvisor implements Runnable {
 
 	//main
-	public static void main(String[] args) {
-        PaperAdvisor paperadvisor = new PaperAdvisor(args);
+	public static void main(String[] args) throws IOException {
+       /* PaperAdvisor paperadvisor = new PaperAdvisor(args);
       
         paperadvisor.execRec(10L, 10L);
 
         //paperadvisor.run();
+        */
+       writeCSV(2,2,2);
     }
 
 	//private variables
@@ -217,6 +221,26 @@ public class PaperAdvisor implements Runnable {
         }
     
     }
+    
+    public static void writeCSV(int userID, int movieID, float rating) throws IOException{
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    FileWriter fw = new FileWriter("data/usuarios.csv",true);
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(userID);
+    sb.append(',');
+    sb.append(movieID);
+    sb.append(',');
+    sb.append(rating);
+    sb.append(',');
+    sb.append(timestamp.getTime());
+    sb.append('\n');
+    fw.append(sb.toString());
+    fw.close();
+    System.out.println("done!");
 }
+ 
+}
+
 
    
